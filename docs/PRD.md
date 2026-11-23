@@ -1,6 +1,6 @@
 # PRD: Unfade Photo Restoration App
 
-**Owner:** Weiyi Sun
+**Owner:** Weiyi Sun, Xuming Zhuge
 
 ---
 
