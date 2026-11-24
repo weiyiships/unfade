@@ -1,16 +1,10 @@
 import { eq } from "drizzle-orm";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { PG, pgErrorCode } from "./pg-error";
 import { photos, users } from "./schema";
-import { createTestDb, type TestDb } from "./test-db";
+import { setupTestDb } from "./test-db";
 
-let db: TestDb;
-let close: () => Promise<void>;
-
-beforeAll(async () => {
-  ({ db, close } = await createTestDb());
-});
-afterAll(() => close?.());
+const testDb = setupTestDb();
 
 const newPhoto = (overrides: Partial<typeof photos.$inferInsert> = {}) => ({
   originalUrl: "https://blob.example/originals/grandma.jpg",
@@ -21,7 +15,7 @@ const newPhoto = (overrides: Partial<typeof photos.$inferInsert> = {}) => ({
 });
 
 async function createUser(email: string) {
-  const [user] = await db
+  const [user] = await testDb()
     .insert(users)
     .values({ name: "Ada", email, passwordHash: "hash" })
     .returning();
@@ -30,7 +24,10 @@ async function createUser(email: string) {
 
 describe("photos table", () => {
   it("stores a visitor photo without a user", async () => {
-    const [photo] = await db.insert(photos).values(newPhoto()).returning();
+    const [photo] = await testDb()
+      .insert(photos)
+      .values(newPhoto())
+      .returning();
 
     expect(photo.id).toMatch(/^[0-9a-f-]{36}$/);
     expect(photo.userId).toBeNull();
@@ -40,7 +37,7 @@ describe("photos table", () => {
 
   it("links a photo to its owner", async () => {
     const user = await createUser("owner@example.com");
-    const [photo] = await db
+    const [photo] = await testDb()
       .insert(photos)
       .values(newPhoto({ userId: user.id }))
       .returning();
@@ -51,7 +48,7 @@ describe("photos table", () => {
   it("rejects a photo for a user that does not exist", async () => {
     expect(
       await pgErrorCode(
-        db
+        testDb()
           .insert(photos)
           .values(newPhoto({ userId: "00000000-0000-4000-8000-000000000000" })),
       ),
@@ -64,18 +61,20 @@ describe("photos table", () => {
     { width: -1, height: 800 },
   ])("rejects non-positive dimensions %o", async (dimensions) => {
     expect(
-      await pgErrorCode(db.insert(photos).values(newPhoto(dimensions))),
+      await pgErrorCode(testDb().insert(photos).values(newPhoto(dimensions))),
     ).toBe(PG.checkViolation);
   });
 
   it("deletes a user's photos when the user is deleted", async () => {
     const user = await createUser("leaving@example.com");
-    await db.insert(photos).values(newPhoto({ userId: user.id }));
+    await testDb()
+      .insert(photos)
+      .values(newPhoto({ userId: user.id }));
 
-    await db.delete(users).where(eq(users.id, user.id));
+    await testDb().delete(users).where(eq(users.id, user.id));
 
     expect(
-      await db.select().from(photos).where(eq(photos.userId, user.id)),
+      await testDb().select().from(photos).where(eq(photos.userId, user.id)),
     ).toEqual([]);
   });
 });

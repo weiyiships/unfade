@@ -13,16 +13,18 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+const id = () => uuid("id").primaryKey().defaultRandom();
+const createdAt = () =>
+  timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
+
 export const users = pgTable(
   "users",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: id(),
     name: text("name").notNull(),
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: createdAt(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],
 );
@@ -30,7 +32,7 @@ export const users = pgTable(
 export const photos = pgTable(
   "photos",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: id(),
     // Null for visitor uploads (PRD FR-6).
     userId: uuid("user_id").references(() => users.id, {
       onDelete: "cascade",
@@ -39,9 +41,7 @@ export const photos = pgTable(
     fileName: text("file_name").notNull(),
     width: integer("width").notNull(),
     height: integer("height").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: createdAt(),
   },
   (t) => [
     check("photos_width_positive", sql`${t.width} > 0`),
@@ -55,7 +55,7 @@ export const restorationStatus = pgEnum(
 );
 
 export const restorations = pgTable("restorations", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: id(),
   photoId: uuid("photo_id")
     .notNull()
     .references(() => photos.id, { onDelete: "cascade" }),
@@ -63,8 +63,6 @@ export const restorations = pgTable("restorations", {
   status: restorationStatus("status").notNull().default("queued"),
   resultUrl: text("result_url"),
   error: text("error"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: createdAt(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
 });

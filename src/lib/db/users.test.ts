@@ -1,16 +1,10 @@
 import { sql } from "drizzle-orm";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { PG, pgErrorCode } from "./pg-error";
 import { users } from "./schema";
-import { createTestDb, type TestDb } from "./test-db";
+import { setupTestDb } from "./test-db";
 
-let db: TestDb;
-let close: () => Promise<void>;
-
-beforeAll(async () => {
-  ({ db, close } = await createTestDb());
-});
-afterAll(() => close?.());
+const testDb = setupTestDb();
 
 const newUser = (email: string) => ({
   name: "Ada",
@@ -20,7 +14,7 @@ const newUser = (email: string) => ({
 
 describe("users table", () => {
   it("stores a user with a generated id and created_at", async () => {
-    const [user] = await db
+    const [user] = await testDb()
       .insert(users)
       .values(newUser("ada@example.com"))
       .returning();
@@ -35,18 +29,22 @@ describe("users table", () => {
   });
 
   it("rejects a duplicate email", async () => {
-    await db.insert(users).values(newUser("dup@example.com"));
+    await testDb().insert(users).values(newUser("dup@example.com"));
 
     expect(
-      await pgErrorCode(db.insert(users).values(newUser("dup@example.com"))),
+      await pgErrorCode(
+        testDb().insert(users).values(newUser("dup@example.com")),
+      ),
     ).toBe(PG.uniqueViolation);
   });
 
   it("treats emails that differ only in case as duplicates", async () => {
-    await db.insert(users).values(newUser("Grace@Example.com"));
+    await testDb().insert(users).values(newUser("Grace@Example.com"));
 
     expect(
-      await pgErrorCode(db.insert(users).values(newUser("grace@example.COM"))),
+      await pgErrorCode(
+        testDb().insert(users).values(newUser("grace@example.COM")),
+      ),
     ).toBe(PG.uniqueViolation);
   });
 
@@ -60,7 +58,7 @@ describe("users table", () => {
 
     expect(
       await pgErrorCode(
-        db.execute(
+        testDb().execute(
           sql.raw(
             `insert into users (${Object.keys(values).join(", ")}) values (${Object.values(values).join(", ")})`,
           ),

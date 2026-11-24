@@ -1,20 +1,14 @@
 import { eq, sql } from "drizzle-orm";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { RESTORATION_STATUSES } from "@/lib/domain/restoration-status";
 import { PG, pgErrorCode } from "./pg-error";
 import { photos, restorationStatus, restorations } from "./schema";
-import { createTestDb, type TestDb } from "./test-db";
+import { setupTestDb } from "./test-db";
 
-let db: TestDb;
-let close: () => Promise<void>;
-
-beforeAll(async () => {
-  ({ db, close } = await createTestDb());
-});
-afterAll(() => close?.());
+const testDb = setupTestDb();
 
 async function createPhoto() {
-  const [photo] = await db
+  const [photo] = await testDb()
     .insert(photos)
     .values({
       originalUrl: "https://blob.example/originals/wedding.png",
@@ -36,7 +30,7 @@ const options = {
 describe("restorations table", () => {
   it("starts queued and stores the chosen options as JSON", async () => {
     const photo = await createPhoto();
-    const [restoration] = await db
+    const [restoration] = await testDb()
       .insert(restorations)
       .values({ photoId: photo.id, optionsJson: options })
       .returning();
@@ -61,7 +55,7 @@ describe("restorations table", () => {
 
     expect(
       await pgErrorCode(
-        db.execute(
+        testDb().execute(
           sql`insert into restorations (photo_id, options_json, status) values (${photo.id}, '{}', 'cancelled')`,
         ),
       ),
@@ -71,7 +65,7 @@ describe("restorations table", () => {
   it("rejects a restoration for a photo that does not exist", async () => {
     expect(
       await pgErrorCode(
-        db.insert(restorations).values({
+        testDb().insert(restorations).values({
           photoId: "00000000-0000-4000-8000-000000000000",
           optionsJson: options,
         }),
@@ -82,7 +76,7 @@ describe("restorations table", () => {
   it("records a finished restoration's result", async () => {
     const photo = await createPhoto();
     const completedAt = new Date("2026-11-24T12:00:00Z");
-    const [restoration] = await db
+    const [restoration] = await testDb()
       .insert(restorations)
       .values({
         photoId: photo.id,
@@ -101,14 +95,14 @@ describe("restorations table", () => {
 
   it("deletes a photo's restorations when the photo is deleted", async () => {
     const photo = await createPhoto();
-    await db
+    await testDb()
       .insert(restorations)
       .values({ photoId: photo.id, optionsJson: options });
 
-    await db.delete(photos).where(eq(photos.id, photo.id));
+    await testDb().delete(photos).where(eq(photos.id, photo.id));
 
     expect(
-      await db
+      await testDb()
         .select()
         .from(restorations)
         .where(eq(restorations.photoId, photo.id)),
