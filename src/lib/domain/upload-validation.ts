@@ -1,5 +1,17 @@
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
+/** Shared with the Blob client-upload token route so both sides enforce the same list. */
+export const ALLOWED_UPLOAD_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+export type AllowedUploadType = (typeof ALLOWED_UPLOAD_TYPES)[number];
+
+function isAllowedType(type: string): type is AllowedUploadType {
+  return (ALLOWED_UPLOAD_TYPES as readonly string[]).includes(type);
+}
+
 export type UploadCheck =
   | { ok: true }
   | {
@@ -12,7 +24,7 @@ export function validateUpload(file: {
   contentType: string;
   size: number;
 }): UploadCheck {
-  if (!["image/jpeg", "image/png", "image/webp"].includes(file.contentType)) {
+  if (!isAllowedType(file.contentType)) {
     return {
       ok: false,
       code: "unsupported_type",
