@@ -36,6 +36,7 @@ npx vitest run -t "orders options"                          # tests by name
 npm run test:e2e       # Playwright (uses the fake restoration provider)
 npm run db:generate    # drizzle-kit generate (new migration from schema)
 npm run db:migrate     # apply migrations to DATABASE_URL
+npm run db:check       # fail if schema.ts and drizzle/ migrations disagree (runs in CI)
 ```
 
 Definition of done for any task: `npm run lint && npm run format:check && npm run typecheck && npm test` passes.
@@ -80,7 +81,7 @@ These follow from the PRD and from platform limits. Change one only by updating 
 - **Test-driven:** write the failing test first (red → green → refactor). A feature isn't done without tests.
 - **Unit (Vitest):** colocated `*.test.ts(x)`. Cover `src/lib/domain` (option ordering, status transitions, file validation), Zod schemas, auth helpers, and components such as the comparison slider.
 - **Provider adapters:** test against recorded or hand-written HTTP fixtures. **Tests never call a real AI provider.** Real calls cost money and are slow and nondeterministic.
-- **Integration:** route handlers against a real test database (`DATABASE_URL_TEST`) in `tests/integration/`, using `FakeProvider` and a stubbed Blob client.
+- **Database and integration:** tests that touch Postgres use `setupTestDb()` from `src/lib/db/test-db.ts`. It runs PGlite (in-memory Postgres) with every committed migration applied, so constraints are tested against real Postgres with no network or `DATABASE_URL`. Route handler tests do the same, with `FakeProvider` and a stubbed Blob client. Assert database errors with `pgErrorCode()` and the `PG` codes in `src/lib/db/pg-error.ts`.
 - **End-to-end (Playwright):** at 375px with `RESTORATION_PROVIDER=fake`, cover upload → restore → compare → download, signup and login → history → delete, and the error and retry paths. Include axe accessibility checks.
 - **Coverage:** 70% overall in CI; aim for 95% on `src/lib/domain`.
 - **Fixtures:** small sample photos in `tests/fixtures/` (under 200 KB each, no real people's family photos).
