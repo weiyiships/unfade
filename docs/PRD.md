@@ -124,7 +124,7 @@ Each story rests on an assumption to test (Mom Test).
 | -------------- | ---------------------------------------------------------------------------------------------------------- |
 | Framework      | Next.js (App Router), TypeScript                                                                           |
 | UI             | Tailwind CSS + shadcn/ui                                                                                   |
-| AI restoration | Replicate (restoration, face enhancement, colorization, and upscaling models) or Gemini image editing; called from server routes only |
+| AI restoration | Replicate by default (restoration, face enhancement, colorization, and upscaling models); Gemini image editing evaluated in Sprint 2; called from server routes only |
 | Image storage  | Vercel Blob (private) for originals and results                                                            |
 | DB             | Postgres (Neon via Vercel Marketplace)                                                                     |
 | ORM            | Drizzle                                                                                                    |
@@ -153,9 +153,9 @@ Measured with at least 5 real users restoring their own old photos:
 ## 11. Milestones
 
 1. **Setup:** repo, CI, test harness, DB schema and migrations, Blob storage
-2. **Validation:** Mom Test conversations; compare candidate restoration models on sample photos; revise this PRD
-3. **P0 build:** US-1 to US-5 as small tickets, each with tests
-4. **P1:** signup and login, restoration history
+2. **Validation:** Mom Test conversations; revise this PRD
+3. **P0 build (Sprint 1):** US-1 to US-5 as small tickets, each with tests, using Replicate as the default provider behind a swappable adapter
+4. **P1 and provider evaluation (Sprint 2):** compare Replicate and Gemini on sample photos and switch the default if Gemini is better; signup and login, restoration history
 5. **Real-world test:** run with real users and their own photos, collect metrics
 6. **Review:** compare results against success metrics and decide next steps
 7. **Stretch (if time):** batch upload, scratch-mask selection, shareable links
