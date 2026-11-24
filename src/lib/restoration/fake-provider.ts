@@ -5,9 +5,9 @@ import type {
 } from "./types";
 
 export class FakeProvider implements RestorationProvider {
-  private polls = new Map<string, number>();
-  private pollsUntilDone: number;
-  private fail: boolean;
+  private readonly polls = new Map<string, number>();
+  private readonly pollsUntilDone: number;
+  private readonly fail: boolean;
 
   constructor(options: { pollsUntilDone?: number; fail?: boolean } = {}) {
     this.pollsUntilDone = options.pollsUntilDone ?? 1;
