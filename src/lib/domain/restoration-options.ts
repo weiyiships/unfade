@@ -23,20 +23,37 @@ export type RestorationStep =
   | { kind: "colorize" }
   | { kind: "upscale"; factor: 2 | 4 };
 
-export const OPTION_DESCRIPTIONS = {
+export const OPTION_DESCRIPTIONS: Record<StepKind, string> = {
   restore: "Repairs scratches, tears, dust, and fading.",
   faces: "Sharpens blurry faces so people look clearer.",
   colorize: "Adds natural color to black-and-white photos.",
   upscale: "Makes the photo larger and sharper for printing.",
-} as const;
+};
+
+export type StepKind = RestorationStep["kind"];
+
+/** Fixed pipeline order (CLAUDE.md decision 6). Add new options here. */
+export const PIPELINE_ORDER: readonly StepKind[] = [
+  "restore",
+  "faces",
+  "colorize",
+  "upscale",
+];
+
+function toStep(
+  kind: StepKind,
+  options: Partial<RestorationOptions>,
+): RestorationStep | null {
+  if (kind === "upscale") {
+    return options.upscale ? { kind, factor: options.upscale } : null;
+  }
+  return options[kind] ? { kind } : null;
+}
 
 export function orderOptions(
   options: Partial<RestorationOptions>,
 ): RestorationStep[] {
-  const steps: RestorationStep[] = [];
-  if (options.restore) steps.push({ kind: "restore" });
-  if (options.faces) steps.push({ kind: "faces" });
-  if (options.colorize) steps.push({ kind: "colorize" });
-  if (options.upscale) steps.push({ kind: "upscale", factor: options.upscale });
-  return steps;
+  return PIPELINE_ORDER.map((kind) => toStep(kind, options)).filter(
+    (step): step is RestorationStep => step !== null,
+  );
 }
