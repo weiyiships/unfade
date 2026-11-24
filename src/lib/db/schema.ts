@@ -1,7 +1,11 @@
 import { sql } from "drizzle-orm";
+import type { RestorationOptions } from "@/lib/domain/restoration-options";
+import { RESTORATION_STATUSES } from "@/lib/domain/restoration-status";
 import {
   check,
   integer,
+  jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -44,3 +48,23 @@ export const photos = pgTable(
     check("photos_height_positive", sql`${t.height} > 0`),
   ],
 );
+
+export const restorationStatus = pgEnum(
+  "restoration_status",
+  RESTORATION_STATUSES,
+);
+
+export const restorations = pgTable("restorations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  photoId: uuid("photo_id")
+    .notNull()
+    .references(() => photos.id, { onDelete: "cascade" }),
+  optionsJson: jsonb("options_json").$type<RestorationOptions>().notNull(),
+  status: restorationStatus("status").notNull().default("queued"),
+  resultUrl: text("result_url"),
+  error: text("error"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+});

@@ -15,6 +15,13 @@
       "when": 1795480890487,
       "tag": "0001_photos",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795480921493,
+      "tag": "0002_restorations",
+      "breakpoints": true
     }
   ]
 }
