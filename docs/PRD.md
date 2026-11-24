@@ -41,15 +41,15 @@ Old photographs become blurry, faded, scratched, or damaged over time. People wh
 
 Each story rests on an assumption to test (Mom Test).
 
-| ID   | Priority | Story                                                                                                                         | Assumption                                                                    |
-| ---- | -------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| US-1 | P0       | As a user, I want to upload an old or damaged photograph, so I can restore it directly in my browser.                         | People have old photos (scanned or phone-captured) they want to fix.          |
-| US-2 | P0       | As a user, I want to automatically enhance blurry or damaged photos using AI, so I can improve their visual quality.          | Existing tools are too complex or scattered across several apps.              |
-| US-3 | P0       | As a user, I want to choose restoration options such as face enhancement, colorization, or upscaling, so I can improve specific aspects of my photo. | One-size-fits-all results are not good enough; users want some control.       |
-| US-4 | P0       | As a user, I want to compare the original and restored images, so I can see the improvements before saving.                  | Users don't trust a restoration until they can see what changed.              |
-| US-5 | P0       | As a user, I want to download my restored photographs, so I can save and share them with family and friends.                  | The end goal is sharing restored photos outside the app.                      |
-| US-6 | P1       | As a user, I want to view my previously restored photos, so I can access my results without repeating the restoration process. | Users restore several photos over time and come back to them.                 |
-| US-7 | P1       | As a user, I want to sign up and log in, so my restorations are saved to my account.                                          | Users will create an account if it means keeping their results.               |
+| ID   | Priority | Story                                                                                                                                                | Assumption                                                              |
+| ---- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| US-1 | P0       | As a user, I want to upload an old or damaged photograph, so I can restore it directly in my browser.                                                | People have old photos (scanned or phone-captured) they want to fix.    |
+| US-2 | P0       | As a user, I want to automatically enhance blurry or damaged photos using AI, so I can improve their visual quality.                                 | Existing tools are too complex or scattered across several apps.        |
+| US-3 | P0       | As a user, I want to choose restoration options such as face enhancement, colorization, or upscaling, so I can improve specific aspects of my photo. | One-size-fits-all results are not good enough; users want some control. |
+| US-4 | P0       | As a user, I want to compare the original and restored images, so I can see the improvements before saving.                                          | Users don't trust a restoration until they can see what changed.        |
+| US-5 | P0       | As a user, I want to download my restored photographs, so I can save and share them with family and friends.                                         | The end goal is sharing restored photos outside the app.                |
+| US-6 | P1       | As a user, I want to view my previously restored photos, so I can access my results without repeating the restoration process.                       | Users restore several photos over time and come back to them.           |
+| US-7 | P1       | As a user, I want to sign up and log in, so my restorations are saved to my account.                                                                 | Users will create an account if it means keeping their results.         |
 
 ## 7. Functional requirements and acceptance criteria
 
@@ -120,18 +120,18 @@ Each story rests on an assumption to test (Mom Test).
 
 ## 9. Technical approach
 
-| Layer          | Choice                                                                                                     |
-| -------------- | ---------------------------------------------------------------------------------------------------------- |
-| Framework      | Next.js (App Router), TypeScript                                                                           |
-| UI             | Tailwind CSS + shadcn/ui                                                                                   |
+| Layer          | Choice                                                                                                                                                               |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework      | Next.js (App Router), TypeScript                                                                                                                                     |
+| UI             | Tailwind CSS + shadcn/ui                                                                                                                                             |
 | AI restoration | Replicate by default (restoration, face enhancement, colorization, and upscaling models); Gemini image editing evaluated in Sprint 2; called from server routes only |
-| Image storage  | Vercel Blob (private) for originals and results                                                            |
-| DB             | Postgres (Neon via Vercel Marketplace)                                                                     |
-| ORM            | Drizzle                                                                                                    |
-| Job status     | Polling every 2 to 3s while a restoration runs                                                             |
-| Auth           | JWT in httpOnly cookies, email and password (bcrypt or argon2 hashing); route protection in Next.js middleware |
-| Tests          | Vitest (unit), Playwright (end-to-end upload, restore, and download flow)                                  |
-| Deploy         | Vercel + GitHub Actions CI                                                                                 |
+| Image storage  | Vercel Blob (private) for originals and results                                                                                                                      |
+| DB             | Postgres (Neon via Vercel Marketplace)                                                                                                                               |
+| ORM            | Drizzle                                                                                                                                                              |
+| Job status     | Polling every 2 to 3s while a restoration runs                                                                                                                       |
+| Auth           | JWT in httpOnly cookies, email and password (bcrypt or argon2 hashing); route protection in Next.js middleware                                                       |
+| Tests          | Vitest (unit), Playwright (end-to-end upload, restore, and download flow)                                                                                            |
+| Deploy         | Vercel + GitHub Actions CI                                                                                                                                           |
 
 **Core data model (draft)**
 

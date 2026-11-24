@@ -4,11 +4,11 @@ How we keep Claude Code sessions focused on this repo. `CLAUDE.md` and the impor
 
 ## What is always in context
 
-| Source                | Why                                                    | Budget                                                  |
-| --------------------- | ------------------------------------------------------ | ------------------------------------------------------- |
-| `CLAUDE.md`           | Stack, architecture decisions, conventions, do's/don'ts | Keep under ~200 lines; move details into `docs/`        |
-| `@docs/PRD.md`        | Acceptance criteria for every story                    | Imported once; don't import other large docs            |
-| `CLAUDE.local.md`     | Personal notes (gitignored), e.g. local DB URL name    | Optional, a few lines                                   |
+| Source            | Why                                                     | Budget                                           |
+| ----------------- | ------------------------------------------------------- | ------------------------------------------------ |
+| `CLAUDE.md`       | Stack, architecture decisions, conventions, do's/don'ts | Keep under ~200 lines; move details into `docs/` |
+| `@docs/PRD.md`    | Acceptance criteria for every story                     | Imported once; don't import other large docs     |
+| `CLAUDE.local.md` | Personal notes (gitignored), e.g. local DB URL name     | Optional, a few lines                            |
 
 Other docs (`docs/claude/*`, future `docs/api/*`) are linked, not imported, so they are read only when a task needs them.
 
